@@ -1,0 +1,28 @@
+<!doctype html>
+
+<head>
+
+<title>Optimum MENA</title>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+<link href="{{ url_for('static',filename='styles/default.css') }}" rel="stylesheet" type="text/css" media="all" />
+<link href="{{ url_for('static',filename='styles/fonts.css') }}" rel="stylesheet" type="text/css" media="all" />
+
+</head>
+
+
+
+
+<body>
+
+<ul>
+	<li><a href="{{ url_for('hello') }}">Home</a></li>
+	<li><a class="active" href="{{ url_for('forecast') }}">Forecast</a></li>
+	<li><a href="#contact">Contact</a></li>
+	<li><a href="#about">About</a></li>
+</ul>
+
+
+
+</body>

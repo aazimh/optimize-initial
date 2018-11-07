@@ -1,0 +1,190 @@
+<!doctype html>
+
+<head>
+
+<title>Optimum MENA</title>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+<link href="{{ url_for('static',filename='styles/default.css') }}" rel="stylesheet" type="text/css" media="all" />
+<link href="{{ url_for('static',filename='styles/fonts.css') }}" rel="stylesheet" type="text/css" media="all" />
+
+</head>
+
+
+
+
+<body>
+
+<div id="nav">
+<ul>
+	<li><a href="{{ url_for('hello') }}"><img src="{{ url_for('static',filename='publicismedia.png') }}" id="logo"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></li>
+	<li><a class="active" href="{{ url_for('forecast') }}">Forecast</a></li>
+	<li><a href="{{ url_for('contact') }}">Contact</a></li>
+	<li><a href="{{ url_for('about') }}">About</a></li>
+</ul>
+</div>
+
+<br />
+
+<!-- ///////// SUMMARY STATS //////////////// -->
+
+<div id="summary">
+	<table>
+		<tr style="margin: 0 auto; width:100%">
+			<th>Media Spend: <span id="mediaspend" style="color:#cf9322"></span></th>
+			<th>Total Sales: <span id="totalsales" style="color:#cf9322"></span></th>
+			<th>Media Sales: <span id="mediasales" style="color:#cf9322"></span></th>
+			<th>Media Contribution: <span id="mediacontrib" style="color:#cf9322"></span></th>
+		</tr>
+	</table>
+</div>
+
+<!--///////////////// CHART STARTING /////////////-->
+
+<br />
+
+<div id="chartContainer" style="height: 370px; width: 95%;margin:0 auto;"></div>
+
+<br />
+<br />
+
+<!--///////////////// FORM STARTING /////////////-->
+
+<form id="laydown" action="{{ url_for('calc_forecast') }}" method="post">
+
+<div id="buttons">
+
+<input id="laydownsubmit" type="submit" name="last" value="Calculate">&nbsp;&nbsp;&nbsp;<input type="button" id="clear" value="Clear">
+
+</div>
+
+<br />
+<br />
+
+{{testval | safe}}
+
+</form>
+
+<!--/////////////////FORM ENDING//////////////////-->
+
+<!-- //////////// SCRIPTS STARTING //////////// -->
+
+<script type="text/javascript" src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+
+<!-- ///////// CANVAS SHIT /////////////// -->
+
+<script type="text/javascript">
+	//set up chart first when window loads
+	window.onload = function () {
+		chart = new CanvasJS.Chart("chartContainer", { 
+			title: {
+				text: "Incremental Sales"
+			},
+			zoomEnabled: true,
+			backgroundColor: '',
+			animationEnabled: true,
+			backgroundColor: '',
+			fontColor: 'white',
+			axisX: {
+				title: 'Dates',
+				labelFontFamily: 'Calibri',
+				titleFontFamily: 'Calibri',
+				labelFontColor : 'white',
+				titleFontColor : 'white'
+			},
+			axisY: {
+				minimum: 0,
+				labelFontFamily: 'Calibri',
+				titleFontFamily: 'Calibri',
+				titleFontColor: 'white',
+				labelFontColor: 'white',
+				title: 'Sales',
+				valueFormatString: '#####.##'
+			},
+			legend: {
+				fontColor : 'white',
+				fontFamily: 'Calibri',
+				cursor: "pointer",
+				itemclick: function (e) {
+					//console.log("legend click: " + e.dataPointIndex);
+					//console.log(e);
+					if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+						e.dataSeries.visible = false;
+					} else {
+						e.dataSeries.visible = true;
+					}
+
+					e.chart.render();
+				}
+			},
+			title: {
+				fontFamily: 'Calibri',
+				fontColor: 'white',
+				text : 'Incremental Sales'
+			},
+			toolTip: {
+				shared:true,
+				reversed: true
+			},
+		});
+		chart.render();	
+		//console.log('Set up chart first time, set window first to true');
+	}
+	
+	
+    var frm = $('#laydown');
+	//form submit function - update chart
+    frm.submit(function (e) {
+
+        e.preventDefault();
+
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                //console.log('Submission was successful.');
+                //console.log(JSON.parse(data)['data']);
+				//$("#chartContainer").style.display = "block";
+				chart.options.data = JSON.parse(data)[0]['data'];
+				chart.render();
+				$("#mediaspend").text(JSON.parse(data)[1]['mediaspend']);
+				$("#totalsales").text(JSON.parse(data)[1]['totalsales']);
+				$("#mediasales").text(JSON.parse(data)[1]['mediasales']);
+				$("#mediacontrib").text(JSON.parse(data)[1]['mediacontrib']);
+            },
+            error: function (data) {
+                console.log('An error occurred.');
+                console.log(data);
+            },
+        });
+    });
+</script>
+
+<!--///////// reset form to zeroes ///////////////-->
+
+<script type="text/javascript">
+$("#clear").click(function(){
+    $(this).closest('form').find(":input:not([type=button]):not([type=submit]):not([type=reset])").val(0);
+});
+</script>
+
+<!--
+<script type="text/javascript">
+window.onload = function () {
+	window.chart = new CanvasJS.Chart("chartContainer", { 
+		title: {
+			text: "Incremental Sales"
+		}
+	});
+	window.chart.render();	
+	window.first = true;
+}
+</script>
+-->
+
+<!-- /////////////// SCRIPTS ENDING ///////////////// -->
+
+</body>
